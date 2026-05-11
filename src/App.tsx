@@ -91,6 +91,20 @@ export default function App() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [isAiAssistantOpen, setIsAiAssistantOpen] = useState(false);
+  const [formStatus, setFormStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
+
+  const handleContactSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    // No prevenimos el default inmediatamente para dejar que el form se envíe al iframe
+    setFormStatus('submitting');
+    
+    // El formulario se enviará automáticamente al iframe invisible
+    // Mostramos éxito después de un pequeño retraso
+    setTimeout(() => {
+      setFormStatus('success');
+      (e.target as HTMLFormElement).reset();
+      setTimeout(() => setFormStatus('idle'), 5000);
+    }, 1500);
+  };
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 40);
@@ -456,23 +470,53 @@ export default function App() {
             </div>
 
             <div className="lg:col-span-7">
-              <form className="space-y-16" onSubmit={(e) => e.preventDefault()}>
+              <form 
+                id="contact-form"
+                className="space-y-16" 
+                onSubmit={handleContactSubmit}
+                action={import.meta.env.VITE_GOOGLE_SHEETS_WEBHOOK_URL || 'https://script.google.com/macros/s/AKfycbzd9co2sqGe8ebs9FP4qbe7JPooswtA2Tn8bg8qeK0WjBVyGgIJdm0fYw-dvK6g1g/exec'}
+                method="POST"
+                target="hidden_iframe"
+              >
                 <div className="grid md:grid-cols-2 gap-16">
                   <div className="group border-b border-brand-primary/10 pb-8 focus-within:border-brand-accent transition-all duration-700">
                     <label className="text-[11px] font-bold uppercase tracking-[0.4em] text-brand-secondary/50 block mb-4 italic italic-none">Nombre Completo / Razón Social</label>
-                    <input type="text" className="w-full bg-transparent outline-none text-2xl placeholder:text-brand-primary/10 font-display italic" placeholder="Su Identidad" />
+                    <input 
+                      name="nombre"
+                      type="text" 
+                      required
+                      className="w-full bg-transparent outline-none text-2xl placeholder:text-brand-primary/10 font-display italic" 
+                      placeholder="Su Identidad" 
+                    />
                   </div>
                   <div className="group border-b border-brand-primary/10 pb-8 focus-within:border-brand-accent transition-all duration-700">
                     <label className="text-[11px] font-bold uppercase tracking-[0.4em] text-brand-secondary/50 block mb-4 italic italic-none">Email de Enlace</label>
-                    <input type="email" className="w-full bg-transparent outline-none text-2xl placeholder:text-brand-primary/10 font-display italic" placeholder="email@corporativo.com" />
+                    <input 
+                      name="email"
+                      type="email" 
+                      required
+                      className="w-full bg-transparent outline-none text-2xl placeholder:text-brand-primary/10 font-display italic" 
+                      placeholder="email@corporativo.com" 
+                    />
                   </div>
                 </div>
                 <div className="group border-b border-brand-primary/10 pb-8 focus-within:border-brand-accent transition-all duration-700">
                   <label className="text-[11px] font-bold uppercase tracking-[0.4em] text-brand-secondary/50 block mb-4 italic italic-none">Naturaleza del Requerimiento</label>
-                  <textarea className="w-full bg-transparent outline-none text-2xl placeholder:text-brand-primary/10 h-48 resize-none font-display italic" placeholder="Describa la situación jurídica..." />
+                  <textarea 
+                    name="mensaje"
+                    required
+                    className="w-full bg-transparent outline-none text-2xl placeholder:text-brand-primary/10 h-48 resize-none font-display italic" 
+                    placeholder="Describa la situación jurídica..." 
+                  />
                 </div>
-                <button className="bg-brand-primary text-white px-20 py-8 rounded-none font-bold text-[10px] uppercase tracking-[0.5em] hover:bg-brand-accent transition-all shadow-[0_30px_60px_-15px_rgba(30,58,95,0.25)]">
-                  Enviar Requerimiento
+                <button 
+                  type="submit"
+                  disabled={formStatus === 'submitting'}
+                  className="bg-brand-primary text-white px-20 py-8 rounded-none font-bold text-[10px] uppercase tracking-[0.5em] hover:bg-brand-accent transition-all shadow-[0_30px_60px_-15px_rgba(30,58,95,0.25)] disabled:opacity-50"
+                >
+                  {formStatus === 'submitting' ? 'Transmitiendo...' : 
+                   formStatus === 'success' ? 'Recibido Correctamente' : 
+                   formStatus === 'error' ? 'Error al Enviar' : 'Enviar Requerimiento'}
                 </button>
               </form>
             </div>
@@ -517,6 +561,9 @@ export default function App() {
           </div>
         </div>
       </footer>
+      
+      {/* Hidden Iframe for Form Submission (Iframe Hack) */}
+      <iframe name="hidden_iframe" id="hidden_iframe" style={{ display: 'none' }}></iframe>
     </div>
   );
 }

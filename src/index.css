@@ -1,0 +1,46 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Cinzel", serif;
+  
+  --color-brand-primary: #4A0E0E; /* Deep Burdeos / Burgundy */
+  --color-brand-secondary: #7A2B2B; /* Lighter Burgundy */
+  --color-brand-accent: #8B1A1A;   /* Pure Burgundy */
+  --color-brand-bg: #FFFFFF;      /* White */
+  --color-brand-text: #2D0A0A;    /* Dark Mahogany Text */
+}
+
+@layer base {
+  body {
+    @apply font-sans bg-brand-bg text-brand-text antialiased selection:bg-brand-primary/10;
+  }
+  
+  h1, h2, h3, h4 {
+    @apply font-display font-medium tracking-wide text-brand-primary;
+  }
+}
+
+.architectural-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 1.5rem;
+}
+
+.brand-link {
+  @apply relative inline-block text-brand-primary font-medium transition-colors hover:text-brand-accent font-sans text-[10px] tracking-widest uppercase;
+}
+
+.brand-link::after {
+  content: '';
+  @apply absolute bottom-0 left-0 w-full h-[1px] bg-brand-accent origin-right scale-x-0 transition-transform duration-300;
+}
+
+.brand-link:hover::after {
+  @apply origin-left scale-x-100;
+}
+
+.glass-morphism {
+  @apply bg-white/70 backdrop-blur-md border border-white/20 shadow-xl;
+}
